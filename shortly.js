@@ -2,7 +2,10 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+// var bcrypt = require('bcrypt-nodejs');
+// var saltRounds = 12;
+// var Promise = require('bluebird');
+var crypto = require('crypto');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -87,13 +90,15 @@ app.get('/signup',
 /************************************************************/
 app.post('/signup',
   function (req, res) {
-    new User({ username: req.body.username }).fetch().then(function (found) {
+    var shasum = crypto.createHash('sha1');
+    shasum.update(req.body.password);
+    new User({ username: req.body.username }, shasum).fetch().then(function (found) {
       if (found) {
-        console.log(`username: ${req.username} already exists, silly`);
+        console.log(`username: ${req.body.username} already exists, silly`);
       } else {
         Users.create({
           username: req.body.username,
-          password: req.body.password
+          password: shasum.digest('hex')
         }).then(function (userCreated) {
           res.status(201).redirect('/');
         }).catch(err => {
@@ -102,10 +107,6 @@ app.post('/signup',
       }
     });
   });
-
-
-
-
 
 
 /************************************************************/
