@@ -87,24 +87,25 @@ app.get('/signup',
 /************************************************************/
 app.post('/signup',
   function (req, res) {
-    console.log('req.body', req.body);
     new User({ username: req.body.username }).fetch().then(function (found) {
-      // console.log('this is found', found);
-      // if (found.attributes.username === req.body.username) {
       if (found) {
         console.log(`username: ${req.username} already exists, silly`);
       } else {
         Users.create({
           username: req.body.username,
           password: req.body.password
-        }).then(function() {
-          res.sendStatus(201).redirect('/');
+        }).then(function (userCreated) {
+          res.status(201).redirect('/');
         }).catch(err => {
-          console.log('Failed to signup', err);
+          console.log('Error sending status? :', err);
         });
       }
     });
   });
+
+
+
+
 
 
 /************************************************************/
