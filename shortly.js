@@ -92,42 +92,18 @@ app.post('/signup',
       // console.log('this is found', found);
       // if (found.attributes.username === req.body.username) {
       if (found) {
-
         console.log(`username: ${req.username} already exists, silly`);
       } else {
-
-        // User.storeUser(req.body)
-        // Users.fetch().then(function(users) {
-          // res.status(200).send(users.models);
-          // res.status(200).save(users.models);
-        // })
-        // util.getUserFromDB(user, function (err, user) {
-        //   User.create({
-        //     username: req.body.username,
-        //     password: req.body.password
-        //   });
-        // }
-        // return res.redirect('/');
-      // }
-
-    //  function (req.body) {
-        var username = req.body.username;
-        var password = req.password;
-        var arr = [username, password];
-        var query = `insert into users (username, password) values (?, ?, NOW())`;
-        var connection = db.connection;
-        connection.query(query, arr, function (err, results){
-          if(err) {
-            console.log('error with our query');
-            cb(err, null);
-          } else{
-            console.log('passed query');
-            cb(null, results);
-          }
-        })
-      // }
-    }
-    })
+        Users.create({
+          username: req.body.username,
+          password: req.body.password
+        }).then(function() {
+          res.sendStatus(201).redirect('/');
+        }).catch(err => {
+          console.log('Failed to signup', err);
+        });
+      }
+    });
   });
 
 
