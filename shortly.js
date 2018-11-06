@@ -108,6 +108,10 @@ app.post('/signup',
     });
   });
 
+app.post('/login',
+  function (req, res) {
+    //
+  });
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
