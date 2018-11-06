@@ -24,24 +24,24 @@ app.use(express.static(__dirname + '/public'));
 
 
 app.get('/',
-  function(req, res) {
+  function (req, res) {
     res.render('index');
   });
 
 app.get('/create',
-  function(req, res) {
+  function (req, res) {
     res.render('index');
   });
 
 app.get('/links',
-  function(req, res) {
-    Links.reset().fetch().then(function(links) {
+  function (req, res) {
+    Links.reset().fetch().then(function (links) {
       res.status(200).send(links.models);
     });
   });
 
 app.post('/links',
-  function(req, res) {
+  function (req, res) {
     var uri = req.body.url;
 
     if (!util.isValidUrl(uri)) {
@@ -49,11 +49,11 @@ app.post('/links',
       return res.sendStatus(404);
     }
 
-    new Link({ url: uri }).fetch().then(function(found) {
+    new Link({ url: uri }).fetch().then(function (found) {
       if (found) {
         res.status(200).send(found.attributes);
       } else {
-        util.getUrlTitle(uri, function(err, title) {
+        util.getUrlTitle(uri, function (err, title) {
           if (err) {
             console.log('Error reading URL heading: ', err);
             return res.sendStatus(404);
@@ -64,7 +64,7 @@ app.post('/links',
             title: title,
             baseUrl: req.headers.origin
           })
-            .then(function(newLink) {
+            .then(function (newLink) {
               res.status(200).send(newLink);
             });
         });
@@ -73,12 +73,12 @@ app.post('/links',
   });
 
 app.get('/login',
-  function(req, res) {
+  function (req, res) {
     res.render('login');
   });
 
 app.get('/signup',
-  function(req, res) {
+  function (req, res) {
     res.render('signup');
   });
 
@@ -86,23 +86,48 @@ app.get('/signup',
 // Write your authentication routes here
 /************************************************************/
 app.post('/signup',
-  function(req, res) {
+  function (req, res) {
     console.log('req.body', req.body);
-    new User().fetch().then(function(found) {
+    new User({ username: req.body.username }).fetch().then(function (found) {
+      // console.log('this is found', found);
+      // if (found.attributes.username === req.body.username) {
       if (found) {
-        // res.sendStatus(404).send
+
         console.log(`username: ${req.username} already exists, silly`);
-      }
+      } else {
 
-      User.create({
-        username: req.body.username,
-        password: req.body.password
-      });
+        // User.storeUser(req.body)
+        // Users.fetch().then(function(users) {
+          // res.status(200).send(users.models);
+          // res.status(200).save(users.models);
+        // })
+        // util.getUserFromDB(user, function (err, user) {
+        //   User.create({
+        //     username: req.body.username,
+        //     password: req.body.password
+        //   });
+        // }
+        // return res.redirect('/');
+      // }
+
+    //  function (req.body) {
+        var username = req.body.username;
+        var password = req.password;
+        var arr = [username, password];
+        var query = `insert into users (username, password) values (?, ?, NOW())`;
+        var connection = db.connection;
+        connection.query(query, arr, function (err, results){
+          if(err) {
+            console.log('error with our query');
+            cb(err, null);
+          } else{
+            console.log('passed query');
+            cb(null, results);
+          }
+        })
+      // }
+    }
     })
-      .then(function() {
-
-      });
-
   });
 
 
@@ -112,8 +137,8 @@ app.post('/signup',
 // If the short-code doesn't exist, send the user to '/'
 /************************************************************/
 
-app.get('/*', function(req, res) {
-  new Link({ code: req.params[0] }).fetch().then(function(link) {
+app.get('/*', function (req, res) {
+  new Link({ code: req.params[0] }).fetch().then(function (link) {
     if (!link) {
       res.redirect('/');
     } else {
@@ -121,9 +146,9 @@ app.get('/*', function(req, res) {
         linkId: link.get('id')
       });
 
-      click.save().then(function() {
+      click.save().then(function () {
         link.set('visits', link.get('visits') + 1);
-        link.save().then(function() {
+        link.save().then(function () {
           return res.redirect(link.get('url'));
         });
       });
