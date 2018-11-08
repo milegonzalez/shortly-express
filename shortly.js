@@ -94,6 +94,7 @@ app.post('/signup',
     shasum.update(req.body.password);
     new User({ username: req.body.username }, shasum).fetch().then(function (found) {
       if (found) {
+        console.log('found', found)
         console.log(`username: ${req.body.username} already exists, silly`);
       } else {
         Users.create({
@@ -110,7 +111,22 @@ app.post('/signup',
 
 app.post('/login',
   function (req, res) {
-    //
+    var shasum = crypto.createHash('sha1');
+    shasum.update(req.body.password);
+    db.get('select * from users where users.username = req.body.username', function(err, res) {
+      if (err) {
+        console.log('Failed to query db', err);
+      }
+      else {
+        console.log('res', res);
+      }
+    });
+    // if user in db does not exist.
+      // redirect to /signup
+    // if user exists AND mismatching password
+      // redirect to /login and say something like username or password is incorrect
+    // else (if exists AND matching  password)
+     // redirect to /
   });
 
 /************************************************************/
